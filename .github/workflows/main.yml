@@ -2,7 +2,8 @@ name: Build and Push Docker image to Docker Hub
 
 on:
   workflow_run:
-    workflows: ["Python"]
+    workflows:
+      - Python
     types:
       - completed
 
