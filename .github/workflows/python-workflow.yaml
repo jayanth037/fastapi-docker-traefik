@@ -1,4 +1,4 @@
-name: Pytest & flake8
+name: Python
 on: push
 jobs:
   qa:
