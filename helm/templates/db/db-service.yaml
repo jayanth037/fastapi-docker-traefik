@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-db-service
+  namespace: {{ .Values.namespace }}
+spec:
+  selector:
+    app: {{ .Release.Name }}-db
+  ports:
+    - protocol: TCP
+      port: {{ .Values.fastapi.database.service.port }}
+      targetPort: {{ .Values.fastapi.database.service.targetPort }}

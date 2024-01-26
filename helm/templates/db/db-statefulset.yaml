@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Release.Name }}-db
+  namespace: {{ .Values.namespace }}
+spec:
+  serviceName: {{ .Release.Name }}-db-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-db
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-db
+    spec:
+      containers:
+        - name: postgres
+          image: {{ .Values.fastapi.database.image.repository }}:{{ .Values.fastapi.database.image.tag }}
+          envFrom:
+            - secretRef:
+                name: {{ .Values.fastapi.database.secretName }}
+          ports:
+            - containerPort: {{ .Values.fastapi.database.service.port }}
+          volumeMounts:
+            - name: postgres-data
+              mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+    - metadata:
+        name: postgres-data
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: "{{ .Values.fastapi.database.persistence.storageSize }}"

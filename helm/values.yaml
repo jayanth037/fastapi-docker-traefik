@@ -1,0 +1,96 @@
+namespace: development
+
+fastapi:
+  image:
+    repository: bullfinch38/fastapi-image
+    tag: latest
+
+  deployment:
+    replicaCount: 1
+    imagePullSecrets: []
+
+  service:
+    name: fastapi-service
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+
+  database:
+    user: fastapi_traefik
+    password: fastapi_traefik
+    dbname: fastapi_traefik
+    image:
+      repository: postgres
+      tag: 15-alpine
+    persistence:
+      claimName: pvc-claim
+      storageSize: 1Gi
+    databaseUrl: "postgresql://fastapi_traefik:fastapi_traefik@db:5432/fastapi_traefik"
+    service:
+      port: 5432
+      targetPort: 5432
+    secretName: dev-db-secret
+
+  ingress:
+    name: fastapi-ingres
+    host: dev-traefik.course-datascientest.cloudns.info
+
+  pvc:
+    enabled: true
+    name: fastapi-pvc
+    accessMode: ReadWriteOnce
+    storageSize: 1Gi
+
+clusterissuer:
+  name: dev-cluster
+  acmeEmail: konstantinsnigirev92@gmail.com
+  acmeServer: https://acme-staging-v02.api.letsencrypt.org/directory
+  privateKeySecretRefName: acme-private-key
+  solverIngressClass: traefik
+
+traefik:
+  image:
+    repository: bullfinch38/traefik-image
+    tag: latest
+
+  deployment:
+    replicaCount: 1
+
+  service:
+    name: traefik-service
+    port: 80
+    targetPort: 80
+
+  configMap:
+    name: traefik-config
+
+  traefikDevToml: |
+    # listen on port 80
+    [entryPoints]
+      [entryPoints.web]
+        address = ":80"
+
+    # Traefik dashboard over http
+    [api]
+      insecure = true
+
+    [log]
+      level = "DEBUG"
+
+    [accessLog]
+
+    # containers are not discovered automatically
+    [providers]
+      [providers.docker]
+        exposedByDefault = false
+
+---
+
+clusterissuer:
+  name: letsencrypt-prod
+  annotations:
+    cert-manager.io/disable-validation: "true"
+  acmeEmail: konstantinsnigirev92@gmail.com
+  acmeServer: https://acme-v02.api.letsencrypt.org/directory
+  privateKeySecretRefName: letsencrypt-prod
+  solverIngressClass: traefik

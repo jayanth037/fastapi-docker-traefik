@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-traefik
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.traefik.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-traefik
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-traefik
+    spec:
+      containers:
+        - name: traefik
+          image: {{ .Values.traefik.image.repository }}:{{ .Values.traefik.image.tag }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.traefik.service.port }}
+#          command:
+#            - "/traefik"
+#            - "--configfile=/etc/traefik/traefik.toml"
+          volumeMounts:
+            - mountPath: "/etc/traefik"
+              name: traefik-config
+              readOnly: true
+      volumes:
+        - name: traefik-config
+          configMap:
+            name: {{ .Values.traefik.configMap.name }}
+            defaultMode: 420
+            items:
+            - key: traefik.toml
+              path: treafik.toml
