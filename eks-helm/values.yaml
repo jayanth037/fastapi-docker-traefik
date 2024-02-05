@@ -1,0 +1,51 @@
+namespace: development
+
+fastapi:
+  deployment:
+    name: fastapi-deployment
+    replicaCount: 1
+    containerPort: 8000
+    app: fastapi
+
+  image:
+    name: fastapi-image
+    repository: bullfinch38/fastapi-image:latest
+    containerPort: 8000
+
+  service:
+    name: fastapi-service
+    port: 80
+    targetPort: 8000
+
+  ingress:
+    name: fastapi-ingress
+    host: helm-eks.devops-fairy.cloudns.biz
+    port: 8000
+
+database:
+  name: db-statefulset
+  app: db
+  replicaCount: 1
+  user: fastapi_traefik
+  password: fastapi_traefik
+  dbname: fastapi_traefik
+
+  secret:
+    name: postgresql-fastapi-credentials
+
+  image:
+    name: postgres
+    repository: postgres:15-alpine
+    containerPort: 5432
+
+  persistence:
+    name: postgres-storage
+    claimName: postgres-storage
+    storageSize: 1Gi
+
+  databaseUrl: "postgresql://fastapi_traefik:fastapi_traefik@db:5432/fastapi_traefik"
+
+  service:
+    name: db
+    port: 5432
+    targetPort: 5432

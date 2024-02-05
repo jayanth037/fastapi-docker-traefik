@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.database.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: {{ .Values.database.replicaCount }}
+  serviceName: {{ .Values.database.service.name }}
+  selector:
+    matchLabels:
+      app: {{ .Values.database.app }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.database.app }}
+    spec:
+      containers:
+      - name: {{ .Values.database.image.name }}
+        image: "{{ .Values.database.image.repository }}"
+        ports:
+        - containerPort: {{ .Values.database.image.containerPort }}
+        env:
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-fastapi-credentials
+              key: username
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgresql-fastapi-credentials
+              key: password
+        - name: POSTGRES_DB
+          value: fastapi_traefik
+        volumeMounts:
+        - name: postgres-storage
+          mountPath: /var/lib/postgresql/data
+  volumeClaimTemplates:
+  - metadata:
+      name: postgres-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: {{ .Values.database.persistence.storageSize }}
