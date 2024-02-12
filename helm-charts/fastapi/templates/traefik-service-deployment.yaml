@@ -1,7 +1,8 @@
+# traefik-service-deployment.yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: traefik-deployment
+  name: {{ .Release.Name }}-traefik-deployment
   labels:
     app: traefik
 
@@ -15,13 +16,13 @@ spec:
       labels:
         app: traefik
     spec:
-      serviceAccountName: traefik-account
+      serviceAccountName: {{ .Release.Name }}-traefik-account
       containers:
         - name: traefik
           image: traefik:v2.10
           args:
             - --api.insecure
-            - --providers.kubernetesingress
+            - --providers.kubernetes
           ports:
             - name: web
               containerPort: 80
@@ -31,12 +32,11 @@ spec:
         - name: traefik-config
           hostPath:
             path: /home/ubuntu/gitlab_exam/gitlab_final_project/fastapi-docker-traefik/yaml-files
-     
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: traefik-dashboard-service
+  name: {{ .Release.Name }}-traefik-dashboard-service
 
 spec:
   type: LoadBalancer
@@ -49,7 +49,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: traefik-web-service
+  name: {{ .Release.Name }}-traefik-web-service
 
 spec:
   type: LoadBalancer
@@ -58,3 +58,4 @@ spec:
       port: 80
   selector:
     app: traefik
+

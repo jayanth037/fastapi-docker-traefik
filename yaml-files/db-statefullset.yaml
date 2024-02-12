@@ -9,19 +9,6 @@ spec:
     - protocol: "TCP"
       port: 5432
       targetPort: 5432
-  clusterIP: None
-
----
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: postgres-storage
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 1Gi
 
 ---
 apiVersion: apps/v1
@@ -51,15 +38,7 @@ spec:
           value: fastapi_traefik
         - name: POSTGRES_DB
           value: fastapi_traefik
-        volumeMounts:
-        - name: postgres-storage
-          mountPath: /var/lib/postgresql/data
-  volumeClaimTemplates:
-  - metadata:
-      name: postgres-storage
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      resources:
-        requests:
-          storage: 1Gi
-
+        - name: LC_ALL
+          value: C.UTF-8
+        - name: LANG
+          value: C.UTF-8
