@@ -35,3 +35,19 @@ spec:
   ports:
     - port: 80
       targetPort: 8000
+      name : web
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: web-service-monitor
+  labels:
+    app: fastapi-traefik
+spec:
+  selector:
+    matchLabels:
+      app: fastapi-traefik
+  endpoints:
+  - port: web
+    interval: 15s  # adjust as needed
+    path: /metrics  # path to your service's metrics endpoint
